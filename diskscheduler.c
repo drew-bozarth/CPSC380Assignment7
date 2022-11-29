@@ -1,17 +1,10 @@
-/*  This program implements the following disck-scheduling algorithms:
-FCFS, SSTF, SCAN, C-SCAN, LOOK, and C-LOOK
-The program services a disk of 5,000 cylinders numbered 0 to 4999.
-It generates a random series of 1000 cylinder requests and services 
-them according to each of he algorithms listed above. The program
-will be passed the initial position of the disk head (as a parameter
-on the command line) and report the total amount of head movement 
-required by each algorithm. 
-To run:
-gcc -o diskAlgorithms diskAlgorithms.c
-./file_name followed by number from 0-4999 for index (see below for example)
-./diskAlgorithms 423
+/*
+Drew Bozarth | Romtin Rezvani
+2373658 | 2341841
+dbozarth@chapman.edu | rrezvani@chapman.edu
+CPSC 380-01
+Assignment 7 - Disk Scheduling Algorithms - diskscheduler.c
 */
-
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,50 +12,57 @@ gcc -o diskAlgorithms diskAlgorithms.c
 #define CYLINDERS 5000
 #define REQUESTS 1000
 
-int start = 0;
+int initialPos = 0;
 
-int ran_array[REQUESTS];
-int test_array[REQUESTS];
+int input_array[REQUESTS];
 
 FILE *ptr;
 
+/*
+Uses bubble sort method to sort the array of requests.
+Used in the Shortest-Seek-Time-First algorithm, and is already sorted
+after that algorithm to be used in SCAN algorithm.
+*/
 int* sort_array() {
 
-	int temp = 0, i = 0, j = 0;
+	int swap = 0, i = 0, j = 0;
 
 	for (i = 0; i < REQUESTS; ++i) {
 
        	for (j = i + 1; j < REQUESTS; ++j) {
 
-            if (ran_array[i] > ran_array[j]) {
+            if (input_array[i] > input_array[j]) {
 
-                temp =  ran_array[i];
-                ran_array[i] = 	ran_array[j];
-                ran_array[j] = temp;
+                swap =  input_array[i];
+                input_array[i] = 	input_array[j];
+                input_array[j] = swap;
             }
         }
     }
 
-    return ran_array;
+    return input_array;
 }
 
 
-/* First-Come-First-Serve (fcfs) starts from the index after the starting
-index and continually adds the headmovement from the starting index in 
-order recieved. If at end of array, start from index zero and continually 
-add until starting index */
-int fcfs(int *ran_array) {
+/* First-Come-First-Serve (fcfs) executes queued requests in the order of their
+arrival. Begins at the index after the initial position index and tallies up the
+headmovement which is the difference between the initial position and the current
+incrementing index. Once it reaches the end of the array, it starts from index 0
+and adds the difference from the initial position to the current index, until it
+reaches the initial position index.
+*/
+int fcfs(int *input_array) {
 
-	int i = 0, head_movement = 0, this_start = ran_array[start];
+	int i = 0;
+	head_movement = 0;
+	start_pos = input_array[initialPos];
 
-    for(i = start; i < REQUESTS; i++) {
-
-    	head_movement += abs(ran_array[i] - this_start);
+    for(i = initialPos; i < REQUESTS; i++) {
+    	head_movement += abs(input_array[i] - start_pos);
     }
 
-    for(i = 0; i < start; i++) {
-
-    	head_movement += abs(this_start - ran_array[i]);
+    for(i = 0; i < initialPos; i++) {
+    	head_movement += abs(start_pos - input_array[i]);
     }
         
     return head_movement;
@@ -71,21 +71,20 @@ int fcfs(int *ran_array) {
 /* Shortest-Seek-Time-First (SSTF) takes the current head position, and
 adds the position closest to the current head. This new position now becomes
 the head, then this system repeats. 
-First we sort the array. Then We have counters for above and below start 
+First we sort the array. Then We have counters for above and below initial pos
 index that we decrement if used. Once these equal to REQUEST-2 (excluding 
-start index) we exit. */
-int sstf(int * ran_array) {
+initial pos index) we exit. */
+int sstf(int * input_array) {
 
-	ran_array = sort_array();
+	input_array = sort_array();
 
-	int small_i = start-1, large_i = start+1;
+	int small_i = initialPos-1, large_i = initialPos+1;
 	int small_diff = 0, large_diff = 0;
-	int head_movement = 0, total = REQUESTS-2, new_head = start, head_value = ran_array[start];
+	int head_movement = 0, total = REQUESTS-2, new_head = initialPos, head_value = input_array[initialPos];
 	
 	while(total >= 0) {
-
-		small_diff = abs(ran_array[new_head] - ran_array[small_i]);
-		large_diff = abs(ran_array[large_i] - ran_array[new_head]);
+		small_diff = abs(input_array[new_head] - input_array[small_i]);
+		large_diff = abs(input_array[large_i] - input_array[new_head]);
 
 		if(small_diff < large_diff) {
 
@@ -101,24 +100,22 @@ int sstf(int * ran_array) {
 		}
 
 		total--;
-
 	}
 
 	return head_movement;
-
 }
 
-/* SCAN - array is already sorted from sstf. SCAN starts from one left of start, 
+/* SCAN - array is already sorted from sstf. SCAN starts from one left of initial pos, 
 and continually goes down to zero (if included in randome array or not). Then 
-starts at one higher than start and continually goes up to highest value (not 5000) */
+starts at one higher than initial pos and continually goes up to highest value (not 5000) */
 int scan(int * ranArray) {
 
-	int i = 0, curr_val = 0, sav_val = ran_array[start], difference = 0;
+	int i = 0, curr_val = 0, sav_val = input_array[initialPos], difference = 0;
 	int head_movement = 0, curr_i = 0;
 
-	for(i = start-1; i >= 0; --i) {
+	for(i = initialPos-1; i >= 0; --i) {
 
-		curr_val = ran_array[i];
+		curr_val = input_array[i];
 		difference = abs(sav_val - curr_val);
 		head_movement += difference;
 		sav_val = curr_val;
@@ -129,9 +126,9 @@ int scan(int * ranArray) {
 	head_movement += sav_val;
 	sav_val = 0;
 
-	for(i = start+1; i < REQUESTS; i++) {
+	for(i = initialPos+1; i < REQUESTS; i++) {
 
-		curr_val = ran_array[i];
+		curr_val = input_array[i];
 		difference = abs(curr_val - sav_val);
 		head_movement += difference;
 		sav_val = curr_val;
@@ -142,17 +139,17 @@ int scan(int * ranArray) {
 
 }
 
-/* Circular Scan (C-SCAN) - start at start index, increase to upper boundary 
-(even if no value at boundary), save boundary value, go to start boundary 
-(zero value) increase till last value before start value */
+/* Circular Scan (C-SCAN) - start at initial pos index, increase to upper boundary 
+(even if no value at boundary), save boundary value, go to initial pos boundary 
+(zero value) increase till last value before initial pos value */
 int cscan(int * ranArray) {
 
-	int i = 0, curr_val = 0, sav_val = ran_array[start], difference = 0;
+	int i = 0, curr_val = 0, sav_val = input_array[initialPos], difference = 0;
 	int head_movement = 0, curr_i = 0, upper_bound = 4999;
 
-	for(i = start+1; i < REQUESTS; i++) {
+	for(i = initialPos+1; i < REQUESTS; i++) {
 
-		curr_val = ran_array[i];
+		curr_val = input_array[i];
 		difference = abs(sav_val - curr_val);
 		head_movement += difference;
 		sav_val = curr_val;
@@ -164,9 +161,9 @@ int cscan(int * ranArray) {
 	sav_val = 0;
 	head_movement += 4999;
 
-	for(i = 0; i < start; i++) {
+	for(i = 0; i < initialPos; i++) {
 
-		curr_val = ran_array[i];
+		curr_val = input_array[i];
 		difference = abs(curr_val - sav_val);
 		head_movement += difference;
 		sav_val = curr_val;
@@ -182,37 +179,39 @@ int cscan(int * ranArray) {
 
 int main (int argc, char *argv[]) {
 
-
 	int i = 0;
-	start = atoi(argv[1]);
 
 	if(argc != 3) {
-		printf("Please retry and make sure the first argument is the start position and the second argument is the file\n");
+		printf("Please retry and make sure the first argument is the initial position and the second argument is the cylinder file\n");
 		exit(-1);
+	} else {
+		// If correct amount of arguments given, the first argument is the initial postiion
+		initialPos = atoi(argv[1]);
 	}
 
+	// try to open the file given as the second argument
 	ptr = fopen(argv[2], "r");
 
 	if (ptr == NULL) {
-		printf("Please retry and make sure the file name is correct and it exists.");
+		printf("Please retry and make sure the file name is correct and it exists.\n");
 		exit(1);
 	}
 
 
 	for (int i = 0; i < REQUESTS; ++i) {
-		fscanf(ptr, "%d", &ran_array[i]); 
+		fscanf(ptr, "%d", &input_array[i]); 
 	}
 
 	for (int i = 0; i < REQUESTS; ++i) {
-		printf("Num: %d\n", ran_array[i]); 
+		printf("Num: %d\n", input_array[i]); 
 	}
 
-	printf("\nStart index: %d, start value: %d\n\n", start, ran_array[start]);
+	printf("\nInitial Position Index: %d, Initial Position Value: %d\n\n", initialPos, input_array[initialPos]);
 
-	printf("FCFS head movements: %d\n", fcfs(ran_array));
-	printf("SSTF head movements: %d\n", sstf(ran_array));
-	printf("SCAN head movements: %d\n", scan(ran_array));
-	printf("CSCAN head movements: %d\n", cscan(ran_array));
+	printf("FCFS cylinder requests: %d\n", fcfs(input_array));
+	printf("SSTF cylinder requests: %d\n", sstf(input_array));
+	printf("SCAN cylinder requests: %d\n", scan(input_array));
+	printf("CSCAN cylinder requests: %d\n", cscan(input_array));
 
 
 	fclose(ptr);

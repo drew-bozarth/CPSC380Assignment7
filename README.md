@@ -30,4 +30,4 @@ by Drew Bozarth &amp; Romtin Rezvani
 Change directory into wherever the files are <code>cd \_\_\_\_</code><br>
 Check to make sure the files are there with <code>ls</code><br>
 Compile the program with <code>gcc diskscheduler.c -o diskscheduler</code><br>
-Run program with <code>./diskscheduler \< initialposition \> \<cylinder file\></code><br>
+Run program with <code>./diskscheduler \< initialposition \> \< cylinder file \> <code><br>
