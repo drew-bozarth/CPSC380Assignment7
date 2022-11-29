@@ -24,6 +24,8 @@ int start = 0;
 int ran_array[REQUESTS];
 int test_array[REQUESTS];
 
+FILE *ptr;
+
 int* sort_array() {
 
 	int temp = 0, i = 0, j = 0;
@@ -184,15 +186,25 @@ int main (int argc, char *argv[]) {
 	int i = 0;
 	start = atoi(argv[1]);
 
-	if(argc != 2) {
-
-		printf("Please compile program with starting index from 0-4999. Ex. ./diskAlgorithms 423\n");
+	if(argc != 3) {
+		printf("Please retry and make sure the first argument is the start position and the second argument is the file\n");
 		exit(-1);
 	}
 
-	for(i = 0; i < REQUESTS; i++) {
+	ptr = fopen(argv[2], "r");
 
-		ran_array[i] = rand() % 5000;
+	if (ptr == NULL) {
+		printf("Please retry and make sure the file name is correct and it exists.");
+		exit(1);
+	}
+
+
+	for (int i = 0; i < REQUESTS; ++i) {
+		fscanf(ptr, "%d", &ran_array[i]); 
+	}
+
+	for (int i = 0; i < REQUESTS; ++i) {
+		printf("Num: %d\n", ran_array[i]); 
 	}
 
 	printf("\nStart index: %d, start value: %d\n\n", start, ran_array[start]);
@@ -201,8 +213,8 @@ int main (int argc, char *argv[]) {
 	printf("SSTF head movements: %d\n", sstf(ran_array));
 	printf("SCAN head movements: %d\n", scan(ran_array));
 	printf("CSCAN head movements: %d\n", cscan(ran_array));
-	printf("LOOK head movements: %d\n", look(ran_array));
-	printf("C-LOOK head movements: %d\n\n", clook(ran_array));
 
+
+	fclose(ptr);
 	return 0;
 }
