@@ -174,61 +174,8 @@ int cscan(int * ranArray) {
 	return head_movement;
 }
 
-/* Look - start from value above start, increase to highest value. 
-Then goes to value below start value and decreases until smallest value */
-int look(int* ranArray) {
 
-	int i = 0, curr_val = 0, sav_val = ran_array[start], difference = 0;
-	int head_movement = 0, curr_i = 0;
 
-	for(i = start+1; i < REQUESTS; i++) {
-
-		curr_val = ran_array[i];
-		difference = abs(sav_val - curr_val);
-		head_movement += difference;
-		sav_val = curr_val;
-
-	}
-
-	for(i = start-1; i >= 0; --i) {
-
-		curr_val = ran_array[i];
-		difference = abs(curr_val - sav_val);
-		head_movement += difference;
-		sav_val = curr_val;
-
-	}
-
-	return head_movement;
-}
-
-/* C-Look - Starts from value after start value, goes to highest value, 
-then goes to smallest value and increases until value before start value */
-int clook(int* ranArray) {
-
-	int i = 0, curr_val = 0, sav_val = ran_array[start], difference = 0;
-	int head_movement = 0, curr_i = 0;
-
-	for(i = start+1; i < REQUESTS; i++) {
-
-		curr_val = ran_array[i];
-		difference = abs(sav_val - curr_val);
-		head_movement += difference;
-		sav_val = curr_val;
-
-	}
-
-	for(i = 0; i < start; i++) {
-
-		curr_val = ran_array[i];
-		difference = abs(curr_val - sav_val);
-		head_movement += difference;
-		sav_val = curr_val;
-
-	}	
-
-	return head_movement;
-}
 
 
 int main (int argc, char *argv[]) {
