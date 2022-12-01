@@ -24,153 +24,119 @@ Used in the Shortest-Seek-Time-First algorithm, and is already sorted
 after that algorithm to be used in SCAN algorithm.
 */
 int* sort_array() {
-	int i = 0; 
-	int j = 0;
-	int swap = 0;
+	int temp = 0;
 
-	for (i = 0; i < numRequests; ++i) {
-       	for (j = i + 1; j < numRequests; ++j) {
+	for (int i = 0; i < numRequests; ++i) {
+       	for (int j = i + 1; j < numRequests; ++j) {
             if (inputArray[i] > inputArray[j]) {
-                swap =  inputArray[i];
+                temp =  inputArray[i];
                 inputArray[i] = inputArray[j];
-                inputArray[j] = swap;
+                inputArray[j] = temp;
             }
         }
     }
     return inputArray;
 }
 
-/* First-Come-First-Serve (fcfs) starts from the index after the starting
-index and continually adds the headmovement from the starting index in 
-order recieved. If at end of array, startIndex from index zero and continually 
-add until starting index */
-int fcfs(int *inputArray) {
+int fcfsAlgorithm(int *inputArray) {
+	int res = 0;
+	int newStart = inputArray[startIndex];
 
-	int i = 0;
-	headMovement = 0;
-	newStart = inputArray[startIndex];
-
-    for(i = startIndex; i < numRequests; i++) {
-
-    	headMovement += abs(inputArray[i] - newStart);
+    for (int i = startIndex; i < numRequests; ++i) {
+    	res += abs(inputArray[i] - newStart);
     }
 
-    for(i = 0; i < startIndex; i++) {
-
-    	headMovement += abs(newStart - inputArray[i]);
+    for (int i = 0; i < startIndex; ++i) {
+    	res += abs(newStart - inputArray[i]);
     }
         
-    return headMovement;
+    return res;
 }
 
-/* Shortest Seek Time First (SSTF) algorithm has the current position and
-adds the position closest to curr. The new position becomes the head and this
-will cyclically repeat. First the array is sorted. We made counters for the indexes
-above and below startIndex that are decremented if used. When the counters are equal
-to numRequests - 2 it exits. */
-int sstf(int * inputArray) {
-
+int sstfAlgorithm(int *inputArray) {
 	inputArray = sort_array();
 
-	int prevIndex = startIndex-1;
-	int nextIndex = startIndex+1;
-	int prevDiff = 0;
-	int nextDiff = 0;
-	int headMovement = 0;
-	int total = numRequests-2;
-	int newHead = startIndex;
+	int nextIndex = startIndex + 1;
+	int prevIndex = startIndex - 1;
+	int res = 0;
 	int headVal = inputArray[startIndex];
+	int total = numRequests - 2;
+	int newHead = startIndex;
 	
-	while(total >= 0) {
-		prevDiff = abs(inputArray[newHead] - inputArray[prevIndex]);
-		nextDiff = abs(inputArray[nextIndex] - inputArray[newHead]);
+	while (total >= 0) {
+		int nextDiff = abs(inputArray[nextIndex] - inputArray[newHead]);
+		int prevDiff = abs(inputArray[newHead] - inputArray[prevIndex]);
 
-		if(prevDiff < nextDiff) {
-			headMovementment += prevDiff;
+		if (nextDiff > prevDiff) {
+			res += prevDiff;
 			newHead = prevIndex;
 			prevIndex--;
 		} else {
-			headMovementment += nextDiff;
+			res += nextDiff;
 			newHead = nextIndex;
 			nextIndex++;
 		}
 		total--;
 	}
 
-	return headMovementment;
+	return res;
 }
 
-/* SCAN - array is already sorted from sstf. SCAN starts from one left of startIndex, 
-and continually goes down to zero (if included in randome array or not). Then 
-starts at one higher than startIndex and continually goes up to highest value (not 5000) */
-int scan(int * inputArray) {
-	int i = 0;
+int scanAlgorithm(int * nputArray) {
 	int currVal = 0;
 	int tempVal = inputArray[startIndex];
 	int diff = 0;
 
-	int headMovement = 0;
+	int res = 0;
 	int currIndex = 0;
 
-	for(i = startIndex-1; i >= 0; --i) {
+	for (int i = startIndex - 1; i >= 0; --i) {
 		currVal = inputArray[i];
 		diff = abs(tempVal - currVal);
-		headMovement += diff;
+		res += diff;
 		tempVal = currVal;
 	}
-
-	/* used to subtract value from zero, or just add same value */
-	headMovement += tempVal;
+	res += tempVal;
 	tempVal = 0;
 
-	for(i = startIndex+1; i < numRequests; i++) {
+	for (int i = startIndex + 1; i < numRequests; ++i) {
 		currVal = inputArray[i];
 		diff = abs(currVal - tempVal);
-		headMovement += diff;
+		res += diff;
 		tempVal = currVal;
 	}
-
-	return headMovement;
+	return res;
 }
 
-/* Circular Scan (C-SCAN) - startIndex at startIndex index, increase to upper boundary 
-(even if no value at boundary), save boundary value, go to startIndex boundary 
-(zero value) increase till last value before startIndex value */
-int cscan(int * inputArray) {
-
-	int i = 0;
+int cscanAlgorithm(int *inputArray) {
 	int currVal = 0;
 	int tempVal = inputArray[startIndex];
 	int diff = 0;
-	int headMovement = 0;
+	int res = 0;
 	int currIndex = 0;
 	int upperBound = 4999;
 
-	for(i = startIndex+1; i < numRequests; i++) {
+	for (int i = startIndex + 1; i < numRequests; ++i) {
 		currVal = inputArray[i];
 		diff = abs(tempVal - currVal);
-		headMovement += diff;
+		res += diff;
 		tempVal = currVal;
 	}
 
-	/* add last val - upper bound, go to and add zero bounday (4999)*/
-	headMovement += upperBound - tempVal;
+	res += upperBound - tempVal;
 	tempVal = 0;
-	headMovement += 4999;
+	res += 4999;
 
-	for(i = 0; i < startIndex; i++) {
+	for (int i = 0; i < startIndex; ++i) {
 		currVal = inputArray[i];
 		diff = abs(currVal - tempVal);
-		headMovement += diff;
+		res += diff;
 		tempVal = currVal;
 	}
-
-	return headMovement;
+	return res;
 }
 
-
-
-int main (int argc, char *argv[]) {
+int main(int argc, char **argv) {
 	startIndex = atoi(argv[1]);
 
 	if (argc != 3) {
@@ -192,13 +158,13 @@ int main (int argc, char *argv[]) {
 		fscanf(ptr, "%d", &inputArray[i]); 
 	}
 
-	printf("Start index: %d\n", startIndex);
-	printf("startIndex value: %d\n", inputArray[startIndex]);
+	printf("Starting index: %d\n", startIndex);
+	printf("Corresponding startIndex value: %d\n", inputArray[startIndex]);
 
-	printf("Total amount of FCFS head movements: %d\n", fcfs(inputArray));
-	printf("Total amount of SSTF head movements: %d\n", sstf(inputArray));
-	printf("Total amount of SCAN head movements: %d\n", scan(inputArray));
-	printf("Total amount of CSCAN head movements: %d\n", cscan(inputArray));
+	printf("Total amount of FCFS head movements: %d\n", fcfsAlgorithm(inputArray));
+	printf("Total amount of SSTF head movements: %d\n", sstfAlgorithm(inputArray));
+	printf("Total amount of SCAN head movements: %d\n", scanAlgorithm(inputArray));
+	printf("Total amount of CSCAN head movements: %d\n", cscanAlgorithm(inputArray));
 
 	fclose(ptr);
 	return 0;
